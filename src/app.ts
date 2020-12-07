@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-import { Application } from "express";
+import { Application, static as staticFiles } from "express";
 import { Container } from "typedi";
 import { createConnection, useContainer as ormUseContainer } from "typeorm";
 import { createExpressServer, useContainer } from "routing-controllers";
@@ -11,6 +11,8 @@ import { SessionController } from "./controllers/Session";
 
 import * as morgan from "morgan";
 import { FileController } from "./controllers/Upload";
+import { ProviderController } from "./controllers/Provider";
+import * as path from "path";
 
 export class App {
 
@@ -28,6 +30,7 @@ export class App {
             controllers: this.controllers()
         });
 
+        this.server.use("/files", staticFiles(path.resolve(__dirname, "..", "tmp", "uploads")));
         this.server.use(morgan("combined"));
     }
 
@@ -49,7 +52,8 @@ export class App {
         return [
             UserController,
             SessionController,
-            FileController
+            FileController,
+            ProviderController
         ];
     }
 

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, BeforeUpdate, BeforeInsert, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, BeforeUpdate, BeforeInsert, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, OneToOne, JoinColumn } from "typeorm";
 import { IsOptional, IsString, IsEmail, IsBoolean } from "class-validator";
 import * as bcrypt from "bcryptjs";
 import { File } from "../models/File";
@@ -27,10 +27,11 @@ export class User {
     @Column({ default: false })
     provider: boolean
 
-    @ManyToOne(() => File, file => file.id, {
+    @OneToOne(() => File, file => file.id, {
         onDelete: "SET NULL",
         onUpdate: "CASCADE"
     })
+    @JoinColumn()
     avatar: string
 
     @CreateDateColumn()

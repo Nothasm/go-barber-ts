@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, AfterLoad } from "typeorm";
 
 @Entity()
 export class File {
@@ -17,4 +17,9 @@ export class File {
 
     @UpdateDateColumn()
     updatedAt: Date
+
+    @AfterLoad()
+    formUrl () {
+        this.path = `http://localhost:3000/files/${this.path}`;
+    }
 }

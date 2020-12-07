@@ -5,6 +5,7 @@ import { UserRepository } from "../repository/User.repository";
 import { BadRequestError, InternalServerError, NotFoundError } from "routing-controllers";
 import * as jwt from "jsonwebtoken";
 import { UpdateUser } from "../utils/interfaces";
+import { UpdateDateColumn } from "typeorm";
 
 @Service()
 export class UserService {
@@ -85,6 +86,24 @@ export class UserService {
         }));
 
         return { id , name, provider: user.provider };
+    }
+
+    async getProviders() {
+        return this.userRepository.find({
+            select: [
+                "id",
+                "name",
+                "email",
+                "provider",
+                "createdAt",
+                "updatedAt",
+                "avatar"
+            ],
+            where: {
+                provider: false
+            },
+            relations: ["avatar"],
+        });
     }
 
 }
