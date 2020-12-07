@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString } from "class-validator";
+import { IsDateString, IsEmail, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class Login {
     @IsEmail()
@@ -21,4 +21,12 @@ export class UpdateUser {
     @IsOptional()
     newPassword: string;
 
+}
+
+export class CreateAppointment {
+    @IsDateString()
+    date: Date;
+
+    @IsUUID()
+    providerId: string;
 }

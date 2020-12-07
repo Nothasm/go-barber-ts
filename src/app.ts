@@ -13,6 +13,7 @@ import * as morgan from "morgan";
 import { FileController } from "./controllers/Upload";
 import { ProviderController } from "./controllers/Provider";
 import * as path from "path";
+import { AppointmentController } from "./controllers/Appointment";
 
 export class App {
 
@@ -53,12 +54,12 @@ export class App {
             UserController,
             SessionController,
             FileController,
-            ProviderController
+            ProviderController,
+            AppointmentController
         ];
     }
 
     public listen() {
-        this.createCon();
         return this.server.listen(this.port, () => console.log(`Server listening on port: ${this.port}`));
     }
 
