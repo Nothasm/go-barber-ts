@@ -1,4 +1,4 @@
-import { JsonController, Post, Body, UseBefore, Req } from "routing-controllers";
+import { JsonController, Post, Body, UseBefore, Req, Get, QueryParam } from "routing-controllers";
 import { AuthMiddleware } from "../middlewares/authentication";
 import { AppointmentService } from "../services/Appointment.service";
 import { CreateAppointment } from "../utils/interfaces";
@@ -12,8 +12,13 @@ export class AppointmentController {
     ) { }
 
     @Post()
-    createAppointment (@Req() { user }: any, @Body() body: CreateAppointment) {
+    createAppointments (@Req() { user }: any, @Body() body: CreateAppointment) {
         return this.appointmentService.createAppointment(user.id, body);
+    }
+
+    @Get()
+    getAppointments (@Req() { user }: any, @QueryParam("page") page: number) {
+        return this.appointmentService.getAppointments(user.id, page);
     }
 
 }

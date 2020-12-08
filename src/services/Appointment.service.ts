@@ -49,4 +49,26 @@ export class AppointmentService {
         return appointment;
     }
 
+    async getAppointments(userId: User["id"], page: number) {
+        if (!page) page = 1;
+
+        const appointments: {
+            id: string,
+            date: string,
+            providerId: string,
+            providerName: string,
+            providerAvatar: string
+        }[] = await this.appointmentRepository
+            .getAppointmentsByUserId(userId, page);
+
+        return appointments.map(v => ({
+            id: v.id,
+            date: v.date,
+            provider: {
+                id: v.providerId,
+                name: v.providerName,
+                avatar: `http://localhost:3000/files/${v.providerAvatar}`
+            }
+        }));
+    }
 }
