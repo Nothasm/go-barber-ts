@@ -14,6 +14,7 @@ import { FileController } from "./controllers/Upload";
 import { ProviderController } from "./controllers/Provider";
 import * as path from "path";
 import { AppointmentController } from "./controllers/Appointment";
+import { ScheduleController } from "./controllers/ScheduleController";
 
 export class App {
 
@@ -55,7 +56,8 @@ export class App {
             SessionController,
             FileController,
             ProviderController,
-            AppointmentController
+            AppointmentController,
+            ScheduleController
         ];
     }
 

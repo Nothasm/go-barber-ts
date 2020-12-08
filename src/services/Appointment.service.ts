@@ -6,6 +6,7 @@ import { AppointmentRepository } from "../repository/Appointment.repository";
 import { CreateAppointment } from "../utils/interfaces";
 import { BadRequestError } from "routing-controllers";
 import * as moment from "moment";
+import { Between } from "typeorm";
 
 @Service()
 export class AppointmentService {
@@ -70,5 +71,28 @@ export class AppointmentService {
                 avatar: `http://localhost:3000/files/${v.providerAvatar}`
             }
         }));
+    }
+
+    async getProviderAppointments(providerId: User["id"], date: Date) {
+        const isProvider = await this.userRepository.findOne({
+            where: {
+                id: providerId,
+                provider: true
+            }
+        });
+        const startOfDay = moment(date).startOf("day").toDate();
+        const endOfDay = moment(date).endOf("day").toDate();
+
+        if (!isProvider) throw new BadRequestError("User is not a provider");
+
+        const appointments = await this.appointmentRepository.find({
+            where: {
+                provider: providerId,
+                canceledAt: null,
+                date: Between(startOfDay, endOfDay)
+            }
+        });
+
+        return appointments;
     }
 }
