@@ -8,7 +8,8 @@ import { BadRequestError } from "routing-controllers";
 import * as moment from "moment";
 import { Between } from "typeorm";
 import { sendNotification } from "../utils";
-import { Appointment } from "src/models/Appointment";
+import { Appointment } from "../models/Appointment";
+import { canceledAppointmentTemplate, sendMail } from "../utils/email";
 
 @Service()
 export class AppointmentService {
@@ -110,8 +111,10 @@ export class AppointmentService {
 
     async cancelAppointment (userId: User["id"], appointmentId: Appointment["id"]) {
         const appointment = await this.appointmentRepository.createQueryBuilder()
-            .select("*")
-            .where(`"id" = :id`, { id: appointmentId })
+            .select(`"Appointment".*, p.name as "providerName", p.email as "providerEmail", u.name as "clientName"`,)
+            .leftJoin("user", "p", `p.id = "Appointment"."providerId"`)
+            .leftJoin("user", "u", `u.id = "Appointment"."userId"`)
+            .where(`"Appointment"."id" = :id`, { id: appointmentId })
             .getRawOne();
 
         if (appointment.canceledAt) throw new BadRequestError("Appointment is already canceled");
@@ -129,6 +132,21 @@ export class AppointmentService {
         await this.appointmentRepository.update(appointment.id, {
             canceledAt
         });
+
+        const to = {
+            name: appointment.providerName as string,
+            email: appointment.providerEmail as string
+        };
+
+        await sendMail(
+            to,
+            "Agendamento cancelado",
+            canceledAppointmentTemplate({
+                to,
+                clientName: appointment.clientName,
+                date: appointment.date
+            })
+        );
 
         return {
             ...appointment,
