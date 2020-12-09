@@ -12,7 +12,7 @@ export class AppointmentController {
     ) { }
 
     @Post()
-    createAppointments (@Req() { user }: any, @Body() body: CreateAppointment) {
+    createAppointment (@Req() { user }: any, @Body() body: CreateAppointment) {
         return this.appointmentService.createAppointment(user.id, body);
     }
 

@@ -7,6 +7,7 @@ import { CreateAppointment } from "../utils/interfaces";
 import { BadRequestError } from "routing-controllers";
 import * as moment from "moment";
 import { Between } from "typeorm";
+import { sendNotification } from "../utils";
 
 @Service()
 export class AppointmentService {
@@ -46,6 +47,14 @@ export class AppointmentService {
             provider: providerId,
             date: startHour
         });
+
+        const user = await this.userRepository.findOne(userId);
+        const formattedDated = moment(startHour).locale("pt-br").format("D [de] MMMM[,] [às] h:mm[h]")
+
+        await sendNotification(
+            providerId,
+            `Novo agendamento de ${user.name} para dia ${formattedDated}`
+        );
 
         return appointment;
     }
