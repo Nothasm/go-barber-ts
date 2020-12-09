@@ -8,6 +8,7 @@ import { BadRequestError } from "routing-controllers";
 import * as moment from "moment";
 import { Between } from "typeorm";
 import { sendNotification } from "../utils";
+import { Appointment } from "src/models/Appointment";
 
 @Service()
 export class AppointmentService {
@@ -105,5 +106,33 @@ export class AppointmentService {
         });
 
         return appointments;
+    }
+
+    async cancelAppointment (userId: User["id"], appointmentId: Appointment["id"]) {
+        const appointment = await this.appointmentRepository.createQueryBuilder()
+            .select("*")
+            .where(`"id" = :id`, { id: appointmentId })
+            .getRawOne();
+
+        if (appointment.canceledAt) throw new BadRequestError("Appointment is already canceled");
+
+        if (userId !== appointment.userId) throw new BadRequestError("You can't cancel this appointment");
+
+        const subHours = moment(appointment.date).subtract(2, "hour");
+
+        if (moment(subHours).isBefore(new Date())) {
+            throw new BadRequestError("You can only cancel appointments two hours in advance");
+        }
+
+        const canceledAt = new Date();
+
+        await this.appointmentRepository.update(appointment.id, {
+            canceledAt
+        });
+
+        return {
+            ...appointment,
+            canceledAt
+        };
     }
 }

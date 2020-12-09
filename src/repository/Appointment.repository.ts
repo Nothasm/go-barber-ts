@@ -15,6 +15,7 @@ export class AppointmentRepository extends Repository<Appointment> {
             .leftJoin("user", "u", `u.id = "Appointment"."providerId"`)
             .leftJoin("file", "f", `f.id = u."avatarId"`)
             .where(`"userId" = :id`, { id })
+            .andWhere(`"canceledAt" IS NULL`)
             .limit(limit)
             .offset(offset)
             .getRawMany();
