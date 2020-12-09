@@ -19,6 +19,8 @@ export class AppointmentService {
     private readonly userRepository: UserRepository
 
     async createAppointment(userId: User["id"], { providerId, date }: CreateAppointment) {
+        if (userId === providerId) throw new BadRequestError("You can't create an appointment with yourself");
+
         const isProvider = await this.userRepository.findOne({
             where: {
                 id: providerId,
