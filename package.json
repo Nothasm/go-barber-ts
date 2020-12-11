@@ -7,6 +7,7 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "start:dev": "ts-node -r dotenv/config --files src/server.ts",
+    "startQueue:dev": "ts-node -r dotenv/config --files src/queue.ts",
     "build:start": "tsc && node dist/server.js",
     "clean": "rm -rf ./dist/* ",
     "test": "jest --setupFiles dotenv/config",
@@ -19,14 +20,17 @@
     "migration:revert": "ts-node -r dotenv/config -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:revert",
     "postgres:start": "docker run -d -p 5432:5432 --name postgres -e POSTGRES_HOST_AUTH_METHOD=trust postgres:11-alpine",
     "mongo:start": "docker run --name mongo -p 27017:27017 -d -t mongo",
+    "redis:start": "docker run --name redis -p 6379:6379 -d -t redis:alpine",
     "database:create": "docker exec postgres psql -U postgres postgres -c \"CREATE DATABASE $(grep DB_DATABASE .env | cut -d= -f 2)\"",
     "postgres:clear": "docker container stop postgres && docker rm postgres",
-    "mongo:clear": "docker container stop mongo && docker rm mongo"
+    "mongo:clear": "docker container stop mongo && docker rm mongo",
+    "redis:clear": "docker container stop redis && docker rm redis"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "bee-queue": "^1.3.1",
     "class-transformer": "^0.3.1",
     "class-validator": "^0.12.2",
     "cors": "^2.8.5",

@@ -3,7 +3,7 @@ import * as nodemailer from "nodemailer";
 
 const mailTransport = nodemailer.createTransport(process.env.SMTP_TRANSPORT_URL);
 
-interface To {
+export interface To {
     name: string,
     email: string
 }

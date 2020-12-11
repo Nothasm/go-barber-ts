@@ -9,7 +9,8 @@ import * as moment from "moment";
 import { Between } from "typeorm";
 import { sendNotification } from "../utils";
 import { Appointment } from "../models/Appointment";
-import { canceledAppointmentTemplate, sendMail } from "../utils/email";
+import Queue from "../utils/queue";
+import CancellationMail from "../jobs/CancellationMail";
 
 @Service()
 export class AppointmentService {
@@ -82,7 +83,9 @@ export class AppointmentService {
                 id: v.providerId,
                 name: v.providerName,
                 avatar: `http://localhost:3000/files/${v.providerAvatar}`
-            }
+            },
+            past: moment(v.date).isBefore(new Date),
+            cancelable: moment(v.date).diff(new Date, "h") >= 2
         }));
     }
 
@@ -117,7 +120,7 @@ export class AppointmentService {
             .where(`"Appointment"."id" = :id`, { id: appointmentId })
             .getRawOne();
 
-        if (appointment.canceledAt) throw new BadRequestError("Appointment is already canceled");
+        // if (appointment.canceledAt) throw new BadRequestError("Appointment is already canceled");
 
         if (userId !== appointment.userId) throw new BadRequestError("You can't cancel this appointment");
 
@@ -138,19 +141,60 @@ export class AppointmentService {
             email: appointment.providerEmail as string
         };
 
-        await sendMail(
+        await Queue.add(CancellationMail.key, {
             to,
-            "Agendamento cancelado",
-            canceledAppointmentTemplate({
-                to,
-                clientName: appointment.clientName,
-                date: appointment.date
-            })
-        );
+            clientName: appointment.clientName,
+            date: appointment.date
+        });
 
         return {
             ...appointment,
             canceledAt
         };
+    }
+
+    async getAvailableHours(providerId: User["id"], date: Date) {
+        const dateMoment = moment(date);
+        const startOfDay = dateMoment.startOf("day").toDate();
+        const endOfDay = dateMoment.endOf("day").toDate();
+
+        const appointments = await this.appointmentRepository.find({
+            where: {
+                provider: providerId,
+                canceledAt: null,
+                date: Between(startOfDay, endOfDay)
+            }
+        });
+
+        console.log(appointments);
+
+        const schedule = [
+            '08:00',
+            '09:00',
+            '10:00',
+            '11:00',
+            '12:00',
+            '13:00',
+            '14:00',
+            '15:00',
+            '16:00',
+            '17:00',
+            '18:00',
+            '19:00',
+        ];
+
+        const available = schedule.map(time => {
+            const [ hour, minutes ] = time.split(":");
+            const value = dateMoment.hour(Number(hour)).minutes(Number(minutes)).seconds(0).milliseconds(0).toDate();
+
+            return {
+                time,
+                value,
+                available: moment(value).isAfter(new Date()) && !appointments.find(d => moment(d.date).isSame(value))
+            }
+
+        });
+
+        return available;
     }
 }

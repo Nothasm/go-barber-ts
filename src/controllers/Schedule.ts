@@ -12,7 +12,6 @@ export class ScheduleController {
 
     @Get()
     getProviderAppointments (@Req() { user }: any, @QueryParam("date") date: Date) {
-        console.log(user);
         return this.appointmentService.getProviderAppointments(user.id, date);
     }
 

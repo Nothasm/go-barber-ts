@@ -100,7 +100,7 @@ export class UserService {
                 "avatar"
             ],
             where: {
-                provider: false
+                provider: true
             },
             relations: ["avatar"],
         });
